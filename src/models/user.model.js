@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema(
             lowercase: true,
             unique: true,
             trim: true,
-            index: true,
         },
         avatar: {
             type: String, // cloudinary url

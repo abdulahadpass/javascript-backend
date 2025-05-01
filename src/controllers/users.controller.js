@@ -3,6 +3,7 @@ import { ApiError } from '../utils/ApiError.js'
 import { User } from '../models/user.model.js'
 import { uploadOnCloudinary } from '../utils/cloudinary.js'
 import { ApiResponse } from '../utils/ApiResponse.js'
+
 const registerUser = asyncHandler(async (req, res) => {
     // get user detail from frontend
     // validation
@@ -16,18 +17,16 @@ const registerUser = asyncHandler(async (req, res) => {
     // return res
 
     const { username, fullName, email, password } = req.body // get user detail
-    // console.log("username: ", username, "password: ", password )
+    console.log("username: ", username, "password: ", password)
 
     //// validation
     if (
-        [fullName, username, email, password].some((feilds) => (
-            feilds?.trim === ""
-        ))
+        [fullName, username, email, password].some((fields) => fields?.trim() === "")
     ) {
         throw new ApiError(400, "All Feilds are required")
     }
     // check user already exist 
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or: [{ username, email }]
     }
     )
@@ -36,17 +35,25 @@ const registerUser = asyncHandler(async (req, res) => {
     }
     // check for img , check for avatar
     const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coveredImageLocalPath = req.files?.coveredImage[0]?.path;
+
+    let coveredImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coveredImageLocalPath = req.files.coverImage[0].path;
+    }
+
+    console.log(avatarLocalPath)
 
     if (!avatarLocalPath) {
-        throw new ApiError('400', 'Avatar is required')
+        throw new ApiError(400, 'Avatar is required')
     }
     // upload on cloudinary, avatar
     const avatar = await uploadOnCloudinary(avatarLocalPath)
-    const coveredImage = await uploadOnCloudinary(coveredImageLocalPath)
+    const coverImage = await uploadOnCloudinary(coveredImageLocalPath)
+    // console.log(avatar);
+    // console.log(coverImage)
 
     if (!avatar) {
-        throw new ApiError('400', 'Avatar is required')
+        throw new ApiError(400, 'Avatar is required')
     }
     // create user
     const user = await User.create({
@@ -55,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
         email,
         password,
         avatar: avatar.url,
-        coverImage: coveredImage.url || ""
+        coverImage: coverImage?.url || ""
     })
     //remove password and refreshToken
     const createdUser = await User.findById(user._id).select(
@@ -71,6 +78,8 @@ const registerUser = asyncHandler(async (req, res) => {
     )
 
 })
+
+
 
 
 export {
