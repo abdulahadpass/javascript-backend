@@ -4,7 +4,7 @@ import { User } from '../models/user.model.js'
 import { deleteOncloudinary, uploadOnCloudinary } from '../utils/cloudinary.js'
 import { ApiResponse } from '../utils/ApiResponse.js'
 import jwt from 'jsonwebtoken'
-import mongoose from 'mongoose'
+import { Types } from 'mongoose'
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
     try {
@@ -355,11 +355,13 @@ const getChannalDetail = asyncHandler(async (req, res) => {
     return res.status(200)
         .json(new ApiResponse(200, channal[0], 'Channal Detail Fetched Successfully'))
 })
-
 const getWatchHistory = asyncHandler(async (req, res) => {
+    if (!Types.ObjectId.isValid(req.user?._id)) {
+        return res.status(400).json({ message: 'Invalid user ID' });
+    }
     const user = await User.aggregate([
         {
-            $match: { _id: new mongoose.Types.ObjectId(req.user._id) }
+            $match: { _id: new Types.ObjectId(req.user?._id) }
         },
         {
             $lookup: {
@@ -384,13 +386,18 @@ const getWatchHistory = asyncHandler(async (req, res) => {
                                 }
                             ]
                         }
+                    },
+                    {
+                        $addFields: {
+                            owner: {
+                                $first: "$owner"
+                            }
+                        }
                     }
                 ]
             },
         },
-        {
-            $unwind : "$owner"
-        }
+
     ])
     return res.status(200)
         .json(new ApiResponse(200, user[0].history, "Watch history fetched successfully"))
