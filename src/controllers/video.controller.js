@@ -89,7 +89,6 @@ const getAllVideo = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, video, "Videos fetched successfully"));
 });
-
 const createUserVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body
     console.log(title)
@@ -220,12 +219,38 @@ const deleteUserVideo = asyncHandler(async (req, res) => {
             new ApiResponse(200, deletedVideo, "Video deleted successfully")
         )
 })
+const toggleAvideo = asyncHandler(async (req, res) => {
+    const findAVideo = await Video.findById(req.video?._id)
+    if (findAVideo.owner?._id.toString() !== req.user?._id.toString()) {
+        throw new ApiError(400, 'you are not the owner of the video')
+    }
 
+    const togglePublishedVideo = await Video.findByIdAndUpdate(findAVideo?._id,
+        {
+            isPublished: !findAVideo?.isPublished
+        },
+        {
+            new: true
+        }
+    )
+    if (!togglePublishedVideo) {
+        throw new ApiError(400, 'Failed to toggle a video')
+    }
 
+    return res.send(200)
+        .json(
+            new ApiResponse(
+                200,
+                { isPublished: togglePublishedVideo.isPublished },
+                'Video toggle successfully'
+            )
+        )
+})
 export {
     getAllVideo,
     createUserVideo,
     getVideo,
     updatedUserVideo,
     deleteUserVideo,
+    toggleAvideo,
 }
