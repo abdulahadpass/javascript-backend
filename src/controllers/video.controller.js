@@ -125,8 +125,6 @@ const createUserVideo = asyncHandler(async (req, res) => {
         )
 })
 const getVideo = asyncHandler(async (req, res) => {
-    console.log("video req", req.video)
-    console.log(req.user)
     await Video.findByIdAndUpdate(req.video?._id, {
         $inc: {
             views: 1
@@ -237,7 +235,7 @@ const toggleAvideo = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Failed to toggle a video')
     }
 
-    return res.send(200)
+    return res.status(200)
         .json(
             new ApiResponse(
                 200,

@@ -29,7 +29,7 @@ export const verifyVideo = asyncHandler(async (req, res, next) => {
                                 as: 'subscribers'
                             },
                         },
-                        
+
                         {
                             $addFields: {
                                 subscriberCount: {
@@ -51,7 +51,7 @@ export const verifyVideo = asyncHandler(async (req, res, next) => {
                                 username: 1,
                                 avatar: 1,
                                 subscriberCount: 1,
-                                isSubscribed:1
+                                isSubscribed: 1
                             }
                         }
                     ]
@@ -77,16 +77,14 @@ export const verifyVideo = asyncHandler(async (req, res, next) => {
                         email: "$owner.email",
                         username: "$owner.username",
                         avatar: "$owner.avatar",
-                        subscriber : "$owner.subscribers"
+                        subscriberCount: "$owner.subscriberCount"
                     },
-                    views : 1,
-                    watchHistory : 1
+                    views: 1,
+                    watchHistory: 1
                 }
             }
         ])
-        console.log(video)
-        
-            req.video = video[0]
+        req.video = video[0]
         next()
     } catch (error) {
         throw new ApiError(401, error.message, "you are not the owner of the current video")

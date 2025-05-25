@@ -5,6 +5,7 @@ import { deleteOncloudinary, uploadOnCloudinary } from '../utils/cloudinary.js'
 import { ApiResponse } from '../utils/ApiResponse.js'
 import jwt from 'jsonwebtoken'
 import { Types } from 'mongoose'
+import { Subscription } from '../models/subscription.model.js'
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
     try {
@@ -298,7 +299,7 @@ const getChannalDetail = asyncHandler(async (req, res) => {
 
     const channal = await User.aggregate([
         {
-            $match: { uaername: username?.toLowerCase() }
+            $match: { username: username?.toLowerCase() }
         },
         {
             $lookup: {
@@ -319,15 +320,17 @@ const getChannalDetail = asyncHandler(async (req, res) => {
         {
             $addFields: {
                 subscriberCount: {
-                    $size: 'subscribers'
+                    $size: '$subscribers'
                 },
                 channelToSubscriberCount: {
-                    $size: 'subscribedTo'
+                    $size: '$subscribedTo'
                 },
-                $cond: {
-                    if: { $in: [req.user?._id, 'subscribers.subscriber'] },
-                    then: true,
-                    else: false
+                isSubscribed: {
+                    $cond: {
+                        if: { $in: [req.user?._id, '$subscribers.subscriber'] },
+                        then: true,
+                        else: false
+                    }
                 }
             }
         },
@@ -352,8 +355,17 @@ const getChannalDetail = asyncHandler(async (req, res) => {
     if (!channal?.length) {
         throw new ApiError(404, 'Channal not Found')
     }
-    return res.status(200)
-        .json(new ApiResponse(200, channal[0], 'Channal Detail Fetched Successfully'))
+    const channalData = channal[0]
+    const isSubscribed = await Subscription.findOne({
+        subscriber: req.user._id,
+        channal: channalData._id,
+    });
+
+    channalData.isSubscribed = !!isSubscribed;
+
+    return res.status(200).json(
+        new ApiResponse(200, channalData, 'Channel detail fetched successfully')
+    );
 })
 const getWatchHistory = asyncHandler(async (req, res) => {
     if (!Types.ObjectId.isValid(req.user?._id)) {
