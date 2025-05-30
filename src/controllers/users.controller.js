@@ -104,7 +104,6 @@ const loginUser = asyncHandler(async (req, res) => {
     // send cookies
 
     const { username, email, password } = req.body
-    console.log(email, password)
     if (
         ![username, email].some((field) => field?.trim())
     ) {

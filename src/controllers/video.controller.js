@@ -3,7 +3,6 @@ import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { deleteOncloudinary, uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Video } from "../models/video.model.js";
-import { v2 as cloudinary } from 'cloudinary'
 import { User } from "../models/user.model.js";
 import mongoose from "mongoose";
 const getAllVideo = asyncHandler(async (req, res) => {
@@ -91,7 +90,6 @@ const getAllVideo = asyncHandler(async (req, res) => {
 });
 const createUserVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body
-    console.log(title)
     if (
         [title, description].some((field) => field?.trim() === '')
     ) {

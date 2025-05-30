@@ -8,6 +8,6 @@ const router = express()
 router.route('/create-tweet').post(verifyJwt, createTweet)
 router.route('/update-tweet/:tweetId').patch(verifyJwt, verifyTweet, updateTweet)
 router.route('/delete-tweet/:tweetId').post(verifyJwt, verifyTweet, removeTweet)
-router.route('/getTweets/:userId').get(getUserTweet)
+router.route('/getTweets/:userId').get(verifyJwt, getUserTweet)
 
 export default router

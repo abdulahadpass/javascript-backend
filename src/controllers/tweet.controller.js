@@ -17,13 +17,13 @@ const createTweet = asyncHandler(async (req, res) => {
     if (!tweet) {
         throw new ApiError(400, 'failed to create tweet')
     }
-    return res.status(200)
+    return res.status(201)
         .json(
-            new ApiResponse(200, tweet, 'Tweet created Successfully')
+            new ApiResponse(201, tweet, 'Tweet created Successfully')
         )
 })
 const removeTweet = asyncHandler(async (req, res) => {
-    if(req.user?._id !== req.tweet?.owner?._id){
+    if (req.user?._id !== req.tweet?.owner?._id) {
         throw new ApiError(400, 'you are not the owner of tha tweet')
     }
     const dltTweet = await Tweet.findByIdAndDelete(req.tweet?._id)
@@ -44,7 +44,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     if (!content) {
         throw new ApiError(400, 'content is required')
     }
-     if(req.user?._id !== req.tweet?.owner?._id){
+    if (req.user?._id !== req.tweet?.owner?._id) {
         throw new ApiError(400, 'you are not the owner of tha tweet')
     }
 
@@ -67,6 +67,7 @@ const updateTweet = asyncHandler(async (req, res) => {
 })
 const getUserTweet = asyncHandler(async (req, res) => {
     const { userId } = req.params
+    console.log(req.user?._id)
 
     if (!isValidObjectId(userId)) {
         throw new ApiError(400, 'User id not valid')
@@ -115,11 +116,9 @@ const getUserTweet = asyncHandler(async (req, res) => {
                     $first: "$ownerTweets",
                 },
                 isLiked: {
-                    $cond: {
-                        if: { $in: [req.user?._id, "$likeDetails.likedBy"] },
-                        then: true,
-                        else: false
-                    }
+                    $in: [
+                        req.user._id, '$likeDetails.likedBy'
+                    ]
                 }
             }
         },
