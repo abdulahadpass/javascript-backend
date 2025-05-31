@@ -9,7 +9,7 @@ export const verifyTweet = asyncHandler(async (req, res, next) => {
         throw new ApiError(400, "tweet id in not valid")
     }
     const findTweet = await Tweet.findById(tweetId)
-    if (!findTweet._id) {
+    if (!findTweet) {
         throw new ApiError(400, 'tweet not Found')
     }
     req.tweet = findTweet

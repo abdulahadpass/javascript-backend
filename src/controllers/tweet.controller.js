@@ -23,7 +23,7 @@ const createTweet = asyncHandler(async (req, res) => {
         )
 })
 const removeTweet = asyncHandler(async (req, res) => {
-    if (req.user?._id !== req.tweet?.owner?._id) {
+    if (req.user?._id.toString() !== req.tweet?.owner.toString()) {
         throw new ApiError(400, 'you are not the owner of tha tweet')
     }
     const dltTweet = await Tweet.findByIdAndDelete(req.tweet?._id)
@@ -44,7 +44,7 @@ const updateTweet = asyncHandler(async (req, res) => {
     if (!content) {
         throw new ApiError(400, 'content is required')
     }
-    if (req.user?._id !== req.tweet?.owner?._id) {
+    if (req.user?._id.toString() !== req.tweet?.owner.toString()) {
         throw new ApiError(400, 'you are not the owner of tha tweet')
     }
 
